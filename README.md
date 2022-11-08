@@ -1,23 +1,29 @@
-# Setup script for Redash with Docker on Ubuntu 18.04.
+# Setup script for Redash with Docker on Amazon Linux 2
 
-This is a reference setup for Redash on a single Ubuntu 18.04 server, which uses Docker and Docker Compose for deployment and management.
+This is a reference setup for Redash on a single Amazon Linux 2 server, which uses Docker and Docker Compose for deployment.
 
-This is the same setup we use for our official images (for AWS & Google Cloud) and can be used as reference if you want to manually setup Redash in a different environment (different OS or different deployment location).
+This setup assumes you already have a PostgreSQL server running with a database and user set up for Redash.
 
-* `setup.sh` is the script that installs everything and creates the directories.
-* `docker-compose.yml` is the Docker Compose setup we use.
-* `packer.json` is Packer configuration we use to create the Cloud images.
+## Provisioning a new server
 
-## FAQ
+1. Spin up a new EC2 instance with the following settings:
+    1. Latest Amazon Linux 2 x86_64 AMI
+    2. Instance type with at least 4GB RAM
+    3. Publicly accessible
 
-### Can I use this in production?
+2. Log into the instance and run the following:
 
-For small scale deployments -- yes. But for larger deployments we recommend at least splitting the database (and probably Redis) into its own server (preferably a managed service like RDS) and setting up at least 2 servers for Redash for redundancy. You will also need to tweak the number of workers based on your usage patterns.
+    ```sh
+    $ sudo yum update
+    $ sudo yum install git
+    $ git clone https://github.com/sales-pop/redash-setup.git
+    $ cd redash-setup && ./install_dependencies.sh
+    ```
 
-### How do I upgrade to newer versions of Redash?
+3. Log out and back in so the user has access to docker. Then run:
 
-See [Upgrade Guide](https://redash.io/help/open-source/admin-guide/how-to-upgrade).
+    ```sh
+    $ cd redash-setup && ./setup.sh
+    ```
 
-### How do I use `setup.sh` on a different operating system?
-
-You will need to update the `install_docker` function and maybe other functions as well.
+4. Redash is up and running and accessible through the instance's public IP address.
