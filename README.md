@@ -67,7 +67,20 @@ $ cd redash-setup && ./setup.sh setup_nginx
 $ docker-compose -f data/docker-compose.yml restart nginx
 ```
 
-TODO: how to auto renew cert because it expires after 4 months
+#### How to renew the certificate (expires every 4 months)
+
+```sh
+$ docker run -t --rm \
+      -v /opt/redash/nginx/certs:/etc/letsencrypt \
+      -v /opt/redash/nginx/certs-data:/data/letsencrypt \
+      certbot/certbot renew --webroot --webroot-path=/data/letsencrypt
+```
+
+Restart NGINX so it picks up the renewed certificate:
+
+```sh
+$ docker-compose -f data/docker-compose.yml kill -s HUP nginx
+```
 
 ## Set up Google OAuth
 
