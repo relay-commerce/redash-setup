@@ -87,13 +87,23 @@ $ docker-compose -f data/docker-compose.yml kill -s HUP nginx
 1. Follow https://redash.io/help/open-source/setup#Google-OAuth-Setup
 2. Add Google's client ID and secret to the .env file.
 
-## Create a read-only user to add PostgreSQL as a data source
+## Create a read-only user to connect a DB as a data source
+
+### PostgreSQL
 
 ```sql
 CREATE USER redash WITH ENCRYPTED PASSWORD '<strong_password>';
 GRANT USAGE ON SCHEMA public TO redash;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO redash;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO redash;
+```
+
+### MySQL
+
+```sql
+CREATE USER 'redash'@'%.ec2.internal' IDENTIFIED BY '<strong_password>';
+GRANT SELECT, SHOW VIEW ON dbname.* TO 'redash'@'%.ec2.internal';
+FLUSH PRIVILEGES;
 ```
 
 ## Provisioning a new PostgreSQL server
