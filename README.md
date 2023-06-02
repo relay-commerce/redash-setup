@@ -68,18 +68,32 @@ $ docker-compose -f data/docker-compose.yml restart nginx
 ```
 
 #### How to renew the certificate (expires every 4 months)
+To renew certificate just run `ssl_certificate_renew.sh` placed in `data` folder.
+
+Before you run it please ensure that docker-compose.yml is accessible via `/home/ec2-user/redash-setup/data/docker-compose.yml` path 
+or change `/home/ec2-user/redash-setup/data/docker-compose.yml` inside `ssl_certificate_renew.sh` to path to Redash compose file.
 
 ```sh
-$ docker run -t --rm \
-      -v /opt/redash/nginx/certs:/etc/letsencrypt \
-      -v /opt/redash/nginx/certs-data:/data/letsencrypt \
-      certbot/certbot renew --webroot --webroot-path=/data/letsencrypt
+$ ./data/ssl_certificate_renew.sh
 ```
 
-Restart NGINX so it picks up the renewed certificate:
+#### Automatic certificate renew
+It is needed to add `crontab` entry to automatically renew certificate.
 
+To do it run crontab editor
 ```sh
-$ docker-compose -f data/docker-compose.yml kill -s HUP nginx
+$ EDITOR=nano crontab -e 
+```
+
+Then add the following entry to it. Note that you should ensure that `/home/ec2-user/redash-setup/data/docker-compose.yml` is correct path to your compose file.
+```
+# Automatically try to renew Redash SSL certificate every month on day-of-month 15.
+0 3 15 * * /home/ec2-user/redash-setup/data/ssl_certificate_renew.sh
+```
+
+Also don't forget to check that cron process is running:
+```sh
+$ service crond status
 ```
 
 ## Set up Google OAuth
