@@ -96,6 +96,46 @@ Also don't forget to check that cron process is running:
 $ service crond status
 ```
 
+## Setup Docker log rotation
+There could be a situation where containers are up and running for a long time 
+and the Docker log files grow to a large size.
+
+Check current logs size for Docker containers.
+```sh
+sudo du -h $(docker inspect --format='{{.LogPath}}' $(docker ps -qa))
+```
+
+Docker log rotation could be configured to avoid a situation when Docker uses too much disk space.
+
+1. Create `daemon.json` for docker configuration.
+```sh
+sudo touch /etc/docker/daemon.json
+```
+2. Start to edit it.
+```sh
+sudo nano /etc/docker/daemon.json
+```
+3. Put the following content in it.Note that you can use any `max-size` and `max-file` values depending on your needs.
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "5"
+  }
+}
+```
+4. Save file and restart Docker service.
+```sh
+sudo systemctl restart docker
+```
+5. Log rotation will be applied only to new containers so we need to restart existing containers.
+```sh
+docker-compose -f data/docker-compose.yml down --remove-orphans
+docker-compose -f data/docker-compose.yml up -d
+```
+6. Profit!
+
 ## Set up Google OAuth
 
 1. Follow https://redash.io/help/open-source/setup#Google-OAuth-Setup
